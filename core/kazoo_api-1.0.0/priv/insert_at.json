@@ -1,0 +1,7 @@
+{
+    "_id":"insert_at"
+    ,"description":"Controls where in the call command queue to put the message"
+    ,"title":"Insert At"
+    ,"type":"string"
+    ,"enum":["head", "tail", "flush", "now"]
+}

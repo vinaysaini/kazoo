@@ -1,0 +1,98 @@
+{
+    "_id":"bridge_req"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"Bridge Request - Connect a caller to endpoint(s)"
+    ,"title":"Bridge Request"
+    ,"exchange":"callctl"
+    ,"routing_key":"{ecallmgr_call_control_queue}"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["call"]
+            ,"default":"call"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["command"]
+            ,"default":"command"
+        }
+        ,"Application-Name":{
+            "type":"string"
+            ,"enum":["bridge"]
+            ,"default":"bridge"
+            ,"description":"Name of the application to execute"
+        }
+        ,"Call-ID":{
+            "type":"string"
+            ,"required":true
+            ,"description":"The Call ID identifying this channel"
+        }
+        ,"Endpoints":{
+            "type":"array"
+            ,"required":true
+            ,"description":"Array of endpoints to attempt a bridge to"
+            ,"items":{
+                "$ref":"bridge_endpoint"
+            }
+            ,"minItems":1
+        }
+        ,"Dial-Endpoint-Method":{
+            "type":"string"
+            ,"description":"Whether to dial all the endpoints in parallel or in sequence"
+            ,"enum":["single","simultaneous"]
+        }
+        ,"Timeout":{
+            "type":"integer"
+            ,"minimum":0
+            ,"description":"How long to attempt the bridge before giving up"
+        }
+        ,"Continue-On-Fail":{
+            "type":"boolean"
+            ,"description":"If true, continue processing the call if the called party can't be reached"
+        }
+        ,"Ignore-Early-Media":{
+            "type":"boolean"
+            ,"description":"Whether to ignore ringing as indicating the call attempt was successful"
+        }
+        ,"Outbound-Caller-ID-Name":{
+            "type":"string"
+            ,"description":"Set the outbound caller ID name"
+        }
+        ,"Outbound-Caller-ID-Number":{
+            "type":"string"
+            ,"description":"Set the outbound caller ID number"
+        }
+        ,"Outbound-Callee-ID-Name":{
+            "type":"string"
+            ,"description":"Set the outbound callee ID name"
+        }
+        ,"Outbound-Callee-ID-Number":{
+            "type":"string"
+            ,"description":"Set the outbound callee ID number"
+        }
+        ,"Caller-ID-Name":{
+            "type":"string"
+            ,"description":"Set the caller ID name"
+        }
+        ,"Caller-ID-Number":{
+            "type":"string"
+            ,"description":"Set the caller ID number"
+        }
+        ,"Callee-ID-Name":{
+            "type":"string"
+            ,"description":"Set the callee ID name"
+        }
+        ,"Callee-ID-Number":{
+            "type":"string"
+            ,"description":"Set the callee ID number"
+        }
+        ,"Insert-At":{
+            "$ref":"insert_at"
+        }
+        ,"Media":{
+            "type":"string"
+            ,"description":"How does media get handled"
+            ,"enum":["process", "bypass", "auto"]
+        }
+    }
+}
