@@ -767,7 +767,6 @@ update_mailbox(#mailbox{mailbox_id=Id
                         ,transcribe_voicemail=MaybeTranscribe
                        }=Box, Call, MediaId, Length) ->
     Transcription = maybe_transcribe(Call, MediaId, MaybeTranscribe),
-
     Prop = [{<<"From-User">>, whapps_call:from_user(Call)}
             ,{<<"From-Realm">>, whapps_call:from_realm(Call)}
             ,{<<"To-User">>, whapps_call:to_user(Call)}
@@ -775,8 +774,8 @@ update_mailbox(#mailbox{mailbox_id=Id
             ,{<<"Account-DB">>, whapps_call:account_db(Call)}
             ,{<<"Voicemail-Box">>, Id}
             ,{<<"Voicemail-Name">>, MediaId}
-            ,{<<"Caller-ID-Number">>, whapps_call:caller_id_number(Call)}
-            ,{<<"Caller-ID-Name">>, whapps_call:caller_id_name(Call)}
+            ,{<<"Caller-ID-Number">>, get_cid_number(Call)}
+            ,{<<"Caller-ID-Name">>, get_cid_name(Call)}
             ,{<<"Voicemail-Timestamp">>, new_timestamp()}
             ,{<<"Voicemail-Length">>, Length}
             ,{<<"Voicemail-Transcription">>, Transcription}
@@ -817,8 +816,8 @@ save_meta(Length, #mailbox{mailbox_id=Id}, Call, MediaId) ->
                  [{<<"timestamp">>, new_timestamp()}
                   ,{<<"from">>, whapps_call:from(Call)}
                   ,{<<"to">>, whapps_call:to(Call)}
-                  ,{<<"caller_id_number">>, whapps_call:caller_id_number(Call)}
-                  ,{<<"caller_id_name">>, whapps_call:caller_id_name(Call)}
+                  ,{<<"caller_id_number">>, get_cid_number(Call)}
+                  ,{<<"caller_id_name">>, get_cid_name(Call)}
                   ,{<<"call_id">>, whapps_call:call_id(Call)}
                   ,{<<"folder">>, ?FOLDER_NEW}
                   ,{<<"length">>, Length}
@@ -1440,6 +1439,12 @@ find_max_message_length([]) ->
                               ,500
                              ).
 
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%%
+%% @end
+%%--------------------------------------------------------------------
 -spec is_owner(whapps_call:call(), ne_binary()) -> boolean().
 is_owner(Call, OwnerId) ->
     case whapps_call:kvs_fetch('owner_id', Call) of
@@ -1447,4 +1452,26 @@ is_owner(Call, OwnerId) ->
         'undefined' -> 'false';
         OwnerId -> 'true';
         _Else -> 'false'
+    end.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%%
+%% @end
+%%--------------------------------------------------------------------
+-spec get_cid_number(whapps_call:call()) -> ne_binary().
+get_cid_number(Call) ->
+    Number = whapps_call:caller_id_number(Call),
+    case whapps_call:kvs_fetch('prepend_cid_number', Call) of
+        'undefined' -> Number;
+        Prefix -> <<(wh_util:to_binary(Prefix))/binary, Number/binary>>
+    end.
+
+-spec get_cid_name(whapps_call:call()) -> ne_binary().
+get_cid_name(Call) ->
+    Name = whapps_call:caller_id_name(Call),
+    case whapps_call:kvs_fetch('prepend_cid_name', Call) of
+        'undefined' -> Name;
+        Prefix -> <<(wh_util:to_binary(Prefix))/binary, Name/binary>>
     end.
