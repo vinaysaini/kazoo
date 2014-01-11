@@ -1,0 +1,55 @@
+{
+    "_id":"route_resp"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"Kazoo Route response with directions on routing"
+    ,"title":"Kazoo Route Response"
+    ,"exchange":"targeted"
+    ,"routing_key":"{Server-ID}"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["dialplan"]
+            ,"default":"dialplan"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["route_resp"]
+            ,"default":"route_resp"
+        }
+        ,"Method":{
+            "description":"Initial action to take on the call"
+            ,"type":"string"
+            ,"required":true
+            ,"enum":["bridge","park","error"]
+        }
+        ,"Custom-Channel-Vars":{
+            "description":"Channel variables set by Kazoo"
+            ,"type":"object"
+        }
+        ,"Routes":{
+            "description":"Routes to connect with the caller"
+            ,"type":"list"
+        }
+        ,"Route-Error-Code":{
+            "description":"SIP error code to send to caller"
+            ,"type":"string"
+        }
+        ,"Route-Error-Message":{
+            "description":"SIP error message to send to the caller"
+            ,"type":"string"
+        }
+        ,"Ringback-Media":{
+            "description":"Media to play during ringing"
+            ,"type":"string"
+        }
+        ,"Transfer-Media":{
+            "description":"Media to play during transfers"
+            ,"type":"string"
+        }
+        ,"Pre-Park":{
+            "description":"Application to run before parking"
+            ,"type":"string"
+            ,"enum":["none","ring_ready","answer"]
+        }
+    }
+}

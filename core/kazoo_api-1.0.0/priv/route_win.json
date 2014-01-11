@@ -1,0 +1,38 @@
+{
+    "_id":"route_win"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"Kazoo Route Win with control queue name for the channel"
+    ,"title":"Kazoo Route Win"
+    ,"exchange":"targeted"
+    ,"routing_key":"{Server-ID}"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["dialplan"]
+            ,"default":"dialplan"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["route_win"]
+            ,"default":"route_win"
+        }
+        ,"Call-ID":{
+            "description":"Unique ID of this channel"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Control-Queue":{
+            "description":"Name of the AMQP queue of the call control process"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Custom-Channel-Vars":{
+            "description":"Channel variables set by Kazoo"
+            ,"type":"object"
+        }
+        ,"Switch-Hostname":{
+            "description":"Hostname of the handling media server"
+            ,"type":"string"
+        }
+    }
+}

@@ -1,0 +1,110 @@
+{
+    "_id":"route_req"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"SIP INVITE Request"
+    ,"title":"SIP INVITE Request"
+    ,"exchange":"callmgr"
+    ,"routing_key":"route.req"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["dialplan"]
+            ,"default":"dialplan"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["route_req"]
+            ,"default":"route_req"
+        }
+        ,"To":{
+            "description":"SIP To field"
+            ,"required":true
+            ,"type":"string"
+        }
+        ,"From":{
+            "description":"SIP From field"
+            ,"required":true
+            ,"type":"string"
+        }
+        ,"Request":{
+            "description":"SIP Request field"
+            ,"required":true
+            ,"type":"string"
+        }
+        ,"Call-ID":{
+            "description":"Unique identifier of the call"
+            ,"required":true
+            ,"type":"string"            
+        }
+        ,"Caller-ID-Name":{
+            "description":"Caller ID Name, if available"
+            ,"required":true
+            ,"type":"string"
+            ,"default":"unknown"
+        }
+        ,"Caller-ID-Number":{
+            "description":"Caller ID Number, if available"
+            ,"required":true
+            ,"type":"string"
+            ,"default":"0000000000"            
+        }
+        ,"Geo-Location":{
+            "description":"Geographic location of requestor"
+            ,"type":"string"
+        }
+        ,"Orig-IP":{
+            "description":"The IP in the X-AUTH-IP Header (usually the endpoint's public IP)"
+            ,"format":"ipv4"
+        }
+        ,"Max-Call-Length":{
+            "description":"Max duration allowed for this call"
+            ,"type":"integer"
+        }
+        ,"Media":{
+            "description":"What to do with the media"
+            ,"type":"string"
+            ,"enum":["process", "proxy", "bypass"]
+        }
+        ,"Transcode":{
+            "description":"Transcode"
+            ,"type":"string"
+        }
+        ,"Codecs":{
+            "description":"Codecs in the request"
+            ,"type":"list"
+        }
+        ,"Custom-Channel-Vars":{
+            "description":"Channel variables set by Kazoo"
+            ,"type":"object"
+        }
+        ,"Resource-Type":{
+            "description":"What type of resource is this channel"
+            ,"type":"string"
+            ,"enum":["audio","video", "MMS", "SMS", "chat"]
+        }
+        ,"Cost-Parameters":{
+            "description":"Parameters related to the cost of the call"
+            ,"type":"object"
+        }
+        ,"From-Network-Addr":{
+            "description":"The IP in the X-AUTH-IP Header (usually the endpoint's public IP)"
+            ,"format":"ipv4"
+        }
+        ,"Switch-Hostname":{
+            "description":"DNS Hostname of the handling media switch"
+            ,"type":"string"
+        }
+        ,"Switch-Nodename":{
+            "description":"Erlang node name of the handling media switch"
+            ,"type":"string"
+        }
+        ,"Ringback-Media":{
+            "description":"What media to play for ringing"
+            ,"type":"string"
+        }
+        ,"Transfer-Media":{
+            "description":"What media to play during transfers"
+            ,"type":"string"
+        }
+    }
+}
