@@ -1,4 +1,3 @@
-
 %%%-------------------------------------------------------------------
 %%% @copyright (C) 2011-2013, 2600Hz INC
 %%% @doc
@@ -44,12 +43,12 @@ sip_profiles_xml(JObj) ->
 
 sip_channel_xml(Props) ->
     ParamsEl = params_el([param_el(K, V) || {K, V} <- Props]),
-    
+
     ChannelEl = channel_el(props:get_value(<<"uuid">>, Props), ParamsEl),
 
     SectionEl = section_el(<<"channels">>, ChannelEl),
 
-    {'ok', xmerl:export([SectionEl], 'fs_xml')}.            
+    {'ok', xmerl:export([SectionEl], 'fs_xml')}.
 
 -spec authn_resp_xml(api_terms()) -> {'ok', iolist()}.
 -spec authn_resp_xml(ne_binary(), wh_json:object()) -> {'ok', xml_els()}.
