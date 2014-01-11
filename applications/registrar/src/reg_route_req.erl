@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2012, VoIP INC
+%%% @copyright (C) 2012-2014, 2600Hz INC
 %%% @doc
 %%% Look up IP for authorization/replaying of route_req
 %%% @end
@@ -15,12 +15,12 @@
 init() -> whapps_maintenance:refresh(?WH_SIP_DB).
 
 -spec handle_route_req(wh_json:object(), wh_proplist()) -> any().
-handle_route_req(JObj, _Props) ->
-    true = wapi_route:req_v(JObj),
+handle_route_req(APIJObj, _Props) ->
+    {'ok', JObj} = kapi_route:req_v(APIJObj),
     maybe_replay_route_req(JObj, wh_json:get_value(<<"From-Network-Addr">>, JObj)).
 
--spec maybe_replay_route_req(wh_json:object(), api_binary()) -> any().
-maybe_replay_route_req(_JObj, undefined) -> ok;
+-spec maybe_replay_route_req(wh_json:object(), api_binary()) -> 'ok'.
+maybe_replay_route_req(_JObj, 'undefined') -> 'ok';
 maybe_replay_route_req(JObj, IP) ->
     lager:debug("trying to see if this route req is an auth-by-ip'd device: ~s", [IP]),
 
@@ -28,11 +28,11 @@ maybe_replay_route_req(JObj, IP) ->
 
     maybe_replay_route_req(JObj, IP, wh_json:get_ne_value(<<"Account-ID">>, CCVs), CCVs).
 
-maybe_replay_route_req(JObj, IP, undefined, CCVs) ->
+maybe_replay_route_req(JObj, IP, 'undefined', CCVs) ->
     case lookup_ip(IP) of
-        {ok, []} ->
+        {'ok', []} ->
             lager:debug("no entry in ~s for IP ~s", [?WH_SIP_DB, IP]);
-        {ok, [Doc|_]} ->
+        {'ok', [Doc|_]} ->
             AccountID = wh_json:get_value([<<"value">>,  <<"account_id">>], Doc),
             OwnerID = wh_json:get_value([<<"value">>, <<"owner_id">>], Doc),
             AuthType = wh_json:get_value([<<"value">>, <<"authorizing_type">>], Doc, <<"anonymous">>),
@@ -51,12 +51,12 @@ maybe_replay_route_req(JObj, IP, undefined, CCVs) ->
 
             JObj1 = wh_json:set_value(<<"Custom-Channel-Vars">>, CCVs1, JObj),
             lager:debug("replaying route_req"),
-            wapi_route:publish_req(JObj1);
-        {error, _E} ->
+            kapi_route:publish_req(JObj1);
+        {'error', _E} ->
             lager:debug("failed to lookup by ip: ~s: ~p", [IP, _E])
     end;
 maybe_replay_route_req(_JObj, _IP, _AcctId, _CCVs) ->
-    ok.
+    'ok'.
 
 lookup_ip(IP) ->
     couch_mgr:get_results(?WH_SIP_DB, <<"credentials/lookup_by_ip">>, [{<<"key">>, IP}]).

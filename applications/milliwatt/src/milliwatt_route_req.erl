@@ -24,8 +24,8 @@
                 ])).
 
 
-handle_req(JObj, Props) ->
-    'true' = wapi_route:req_v(JObj),
+handle_req(APIJObj, Props) ->
+    {'ok', JObj} = kapi_route:req_v(APIJObj),
     CallId = wh_json:get_value(<<"Call-ID">>, JObj),
     put('callid', CallId),
     Call = whapps_call:from_route_req(JObj),
@@ -50,7 +50,7 @@ send_route_response(ControllerQ, JObj) ->
                                    | wh_api:default_headers(ControllerQ, ?APP_NAME, ?APP_VERSION)
                                   ]),
     ServerId = wh_json:get_value(<<"Server-ID">>, JObj),
-    Publisher = fun(P) -> wapi_route:publish_resp(ServerId, P) end,
+    Publisher = fun(P) -> kapi_route:publish_resp(ServerId, P) end,
     whapps_util:amqp_pool_send(Resp, Publisher),
     lager:info("milliwatt knows how to route the call! sent park response").
 

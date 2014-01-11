@@ -206,8 +206,8 @@ handle_authn_req(APIJObj, Props) ->
     end.
 
 -spec handle_route_req(wh_json:object(), wh_proplist()) -> 'ok'.
-handle_route_req(JObj, Props) ->
-    'true' = wapi_route:req_v(JObj),
+handle_route_req(APIJObj, Props) ->
+    {'ok', JObj} = kapi_route:req_v(APIJObj),
     BridgeRequest = props:get_value('bridge_request', Props),
     case binary:split(wh_json:get_value(<<"To">>, JObj), <<"@">>) of
         [BridgeRequest, _] ->
@@ -217,8 +217,8 @@ handle_route_req(JObj, Props) ->
     end.
 
 -spec handle_route_win(wh_json:object(), wh_proplist()) -> 'ok'.
-handle_route_win(JObj, Props) ->
-    'true' = wapi_route:win_v(JObj),
+handle_route_win(APIJObj, Props) ->
+    {'ok', JObj} = kapi_route:win_v(APIJObj),
     Srv = props:get_value('server', Props),
     gen_listener:cast(Srv, {'route_win', JObj}).
 
@@ -640,7 +640,7 @@ publish_route_response(ControllerQ, MsgId, ServerId, AccountId) ->
             ,{<<"Method">>, <<"park">>}
             ,{<<"From-Realm">>, wh_util:get_account_realm(AccountId)}
             | wh_api:default_headers(ControllerQ, ?APP_NAME, ?APP_VERSION)],
-    wapi_route:publish_resp(ServerId, Resp).
+    kapi_route:publish_resp(ServerId, Resp).
 
 -spec send_authn_response/4 :: (api_binary(), ne_binary(), whapps_conference:conference(), whapps_call:call()) -> 'ok'.
 send_authn_response(MsgId, ServerId, Conference, Call) ->

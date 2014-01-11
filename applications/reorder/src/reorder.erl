@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2012-2013, 2600Hz
+%%% @copyright (C) 2012-2014, 2600Hz
 %%% @doc
 %%%
 %%% @end
@@ -71,5 +71,5 @@ start_deps() ->
 %%--------------------------------------------------------------------
 -spec declare_exchanges() -> 'ok'.
 declare_exchanges() ->
-    _ = wapi_route:declare_exchanges(),
+    _ = kapi_route:declare_exchanges(),
     kapi_self:declare_exchanges().

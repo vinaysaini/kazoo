@@ -429,7 +429,7 @@ handle_cast({'gen_listener', {'created_queue', Q}}, #state{callid=CallId
            | wh_api:default_headers(Q, <<"dialplan">>, <<"route_win">>, ?APP_NAME, ?APP_VERSION)
           ],
     lager:debug("sending route_win to ~s", [ControllerQ]),
-    wapi_route:publish_win(ControllerQ, Win),
+    _ = kapi_route:publish_win(ControllerQ, Win),
     Usurp = [{<<"Call-ID">>, CallId}
              ,{<<"Fetch-ID">>, FetchId}
              ,{<<"Reason">>, <<"Route-Win">>}

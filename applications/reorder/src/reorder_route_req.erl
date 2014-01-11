@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2011-2012, VoIP INC
+%%% @copyright (C) 2011-2014, 2600Hz INC
 %%% @doc
 %%% handler for route requests, responds if reorder match
 %%% @end
@@ -12,10 +12,10 @@
 
 -export([handle_req/2]).
 
--spec handle_req/2 :: (wh_json:object(), wh_proplist()) -> 'ok'.
+-spec handle_req(wh_json:object(), wh_proplist()) -> 'ok'.
 handle_req(JObj, Props) ->
     case wh_json:get_value([<<"Custom-Channel-Vars">>, <<"Authorizing-ID">>], JObj)
-        =:= 'undefined' 
+        =:= 'undefined'
     of
         'true' ->
             lager:info("received a unauthorized route request"),
@@ -47,7 +47,7 @@ get_dest_number(JObj) ->
             lager:debug("converted number to e164: ~s", [Number]),
             Number
     end.
-    
+
 -spec assume_e164(ne_binary()) -> ne_binary().
 assume_e164(<<$+, _/binary>> = Number) -> Number;
 assume_e164(Number) -> <<$+, Number/binary>>.
@@ -64,7 +64,7 @@ send_known_number_response(JObj, Q) ->
             ,{<<"Defer-Response">>, <<"true">>}
             | wh_api:default_headers(Q, ?APP_NAME, ?APP_VERSION)
            ],
-    wapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, JObj), Resp).
+    kapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, JObj), Resp).
 
 -spec send_unknown_number_response(wh_json:object(), ne_binary()) -> 'ok'.
 send_unknown_number_response(JObj, Q) ->
@@ -78,4 +78,4 @@ send_unknown_number_response(JObj, Q) ->
             ,{<<"Defer-Response">>, <<"true">>}
             | wh_api:default_headers(Q, ?APP_NAME, ?APP_VERSION)
            ],
-    wapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, JObj), Resp).
+    kapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, JObj), Resp).

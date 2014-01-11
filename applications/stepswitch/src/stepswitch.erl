@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2010-2013, 2600Hz
+%%% @copyright (C) 2010-2014, 2600Hz
 %%% @doc
 %%% stepswitch routing WhApp
 %%% @end
@@ -79,5 +79,5 @@ declare_exchanges() ->
     _ = wapi_dialplan:declare_exchanges(),
     _ = wapi_offnet_resource:declare_exchanges(),
     _ = wapi_resource:declare_exchanges(),
-    _ = wapi_route:declare_exchanges(),
+    _ = kapi_route:declare_exchanges(),
     kapi_self:declare_exchanges().

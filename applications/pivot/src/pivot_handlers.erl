@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2012, VoIP INC
+%%% @copyright (C) 2012-2014, 2600Hz INC
 %%% @doc
 %%% Handlers for various AMQP payloads
 %%% @end
@@ -16,17 +16,17 @@
 -include("pivot.hrl").
 
 -spec handle_route_req(wh_json:object(), wh_proplist()) -> any().
-handle_route_req(JObj, Props) ->
-    true = wapi_route:req_v(JObj),
-    _Q = props:get_value(queue, Props),
+handle_route_req(APIJObj, Props) ->
+    {'ok', JObj} = kapi_route:req_v(APIJObj),
+    _Q = props:get_value('queue', Props),
 
     %% sends route_resp with "park" by default
     ok.
 
 %% receiving the route_win means we are in control of the call
 -spec handle_route_win(wh_json:object(), wh_proplist()) -> any().
-handle_route_win(JObj, _Props) ->
-    true = wapi_route:win_v(JObj),
+handle_route_win(APIJObj, _Props) ->
+    {'ok', JObj} = kapi_route:win_v(APIJObj),
 
     %% Create the call data structure
     Call = whapps_call:from_json(JObj),

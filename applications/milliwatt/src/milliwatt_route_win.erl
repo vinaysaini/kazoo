@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2013, VoIP, INC
+%%% @copyright (C) 2013-2014, 2600Hz, INC
 %%% @doc
 %%%
 %%% @end
 %%% @contributors
-%%% Peter Defebvre
+%%%   Peter Defebvre
 %%%-------------------------------------------------------------------
 -module(milliwatt_route_win).
 
@@ -12,8 +12,8 @@
 
 -include("milliwatt.hrl").
 
-handle_req(JObj, _Props) ->
-    'true' = wapi_route:win_v(JObj),
+handle_req(APIJObj, _Props) ->
+    {'ok', JObj} = kapi_route:win_v(APIJObj),
     CallId = wh_json:get_value(<<"Call-ID">>, JObj),
     put('callid', CallId),
     case whapps_call:retrieve(CallId) of

@@ -13,8 +13,8 @@
 -export([handle_req/2]).
 
 -spec handle_req(wh_json:object(), wh_proplist()) -> 'ok'.
-handle_req(JObj, Props) ->
-    'true' = wapi_route:req_v(JObj),
+handle_req(APIJObj, Props) ->
+    {'ok', JObj} = kapi_route:req_v(APIJObj),
     Call = whapps_call:from_route_req(JObj),
     case is_binary(whapps_call:account_id(Call))
         andalso callflow_should_respond(Call)
@@ -97,7 +97,7 @@ send_route_response(Flow, JObj, Q, Call) ->
                                    | wh_api:default_headers(Q, ?APP_NAME, ?APP_VERSION)
                                   ]),
     ServerId = wh_json:get_value(<<"Server-ID">>, JObj),
-    Publisher = fun(P) -> wapi_route:publish_resp(ServerId, P) end,
+    Publisher = fun(P) -> kapi_route:publish_resp(ServerId, P) end,
     whapps_util:amqp_pool_send(Resp, Publisher),
     lager:info("callflows knows how to route the call! sent park response").
 

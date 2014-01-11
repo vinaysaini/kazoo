@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2011-2013, 2600Hz, INC
+%%% @copyright (C) 2011-2014, 2600Hz, INC
 %%% @doc
 %%%
 %%% @end
@@ -83,5 +83,5 @@ declare_exchanges() ->
     _ = wapi_notifications:declare_exchanges(),
     _ = wapi_offnet_resource:declare_exchanges(),
     _ = wapi_pivot:declare_exchanges(), %% TODO: decouple
-    _ = wapi_route:declare_exchanges(),
+    _ = kapi_route:declare_exchanges(),
     kapi_self:declare_exchanges().

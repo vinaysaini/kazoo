@@ -83,6 +83,6 @@ declare_exchanges() ->
     _ = wapi_rate:declare_exchanges(),
     _ = wapi_registration:declare_exchanges(),
     _ = wapi_resource:declare_exchanges(),
-    _ = wapi_route:declare_exchanges(),
+    _ = kapi_route:declare_exchanges(),
     _ = wapi_sysconf:declare_exchanges(),
     kapi_self:declare_exchanges().

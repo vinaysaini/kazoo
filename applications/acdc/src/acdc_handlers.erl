@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2012, 2600Hz
+%%% @copyright (C) 2012-2014, 2600Hz
 %%% @doc
 %%%
 %%% @end
@@ -14,8 +14,8 @@
 
 -include("acdc.hrl").
 
-handle_route_req(JObj, Props) ->
-    'true' = wapi_route:req_v(JObj),
+handle_route_req(APIJObj, Props) ->
+    {'ok', JObj} = kapi_route:req_v(APIJObj),
     _ = wh_util:put_callid(JObj),
 
     Call = whapps_call:set_controller_queue(props:get_value('queue', Props)
@@ -50,12 +50,12 @@ send_route_response(ReqJObj, Call, AccountId, Id, Type) ->
             ,{<<"From-Realm">>, wh_util:get_account_realm(AccountId)}
             | wh_api:default_headers(whapps_call:controller_queue(Call), ?APP_NAME, ?APP_VERSION)
            ],
-    wapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, ReqJObj), Resp),
+    kapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, ReqJObj), Resp),
     _ = whapps_call:cache(Call),
     lager:debug("sent route response to park the call for ~s(~s)", [Id, AccountId]).
 
 handle_route_win(JObj, _Props) ->
-    'true' = wapi_route:win_v(JObj),
+    'true' = kapi_route:win_v(JObj),
     _ = wh_util:put_callid(JObj),
 
     case whapps_call:retrieve(wh_json:get_value(<<"Call-ID">>, JObj)) of

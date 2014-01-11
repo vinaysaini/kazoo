@@ -17,8 +17,8 @@
 %% @end
 %%--------------------------------------------------------------------
 -spec handle_req(wh_json:object(), wh_proplist()) -> 'ok'.
-handle_req(JObj, _Props) ->
-    'true' = wapi_route:req_v(JObj),
+handle_req(APIJObj, _Props) ->
+    {'ok', JObj} = kapi_route:req_v(APIJObj),
     _ = whapps_util:put_callid(JObj),
     case wh_json:get_ne_value(?CCV(<<"Account-ID">>), JObj) of
         'undefined' -> maybe_relay_request(JObj);
@@ -145,7 +145,8 @@ maybe_lookup_cnam(Props, JObj) ->
 -spec relay_request(wh_proplist(), wh_json:object()) ->
                            wh_json:object().
 relay_request(_, JObj) ->
-    wapi_route:publish_req(JObj).
+    kapi_route:publish_req(JObj),
+    JObj.
 
 %%--------------------------------------------------------------------
 %% @private

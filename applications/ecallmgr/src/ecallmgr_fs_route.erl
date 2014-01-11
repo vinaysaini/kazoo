@@ -184,15 +184,15 @@ search_for_route(Node, FetchId, CallId, Props) ->
     _ = spawn('ecallmgr_fs_authz', 'authorize', [Props, CallId, Node]),
     ReqResp = wh_amqp_worker:call(?ECALLMGR_AMQP_POOL
                                   ,route_req(CallId, FetchId, Props, Node)
-                                  ,fun wapi_route:publish_req/1
-                                  ,fun wapi_route:is_actionable_resp/1
+                                  ,fun kapi_route:publish_req/1
+                                  ,fun kapi_route:is_actionable_resp/1
                                   ,2500
                                  ),
     case ReqResp of
         {'error', _R} ->
             lager:info("did not receive route response for request ~s: ~p", [FetchId, _R]);
-        {'ok', JObj} ->
-            'true' = wapi_route:resp_v(JObj),
+        {'ok', APIJObj} ->
+            {'ok', JObj} = kapi_route:resp_v(APIJObj),
             J = wh_json:set_value(<<"Context">>, hunt_context(Props), JObj),
             maybe_wait_for_authz(J, Node, FetchId, CallId)
     end.

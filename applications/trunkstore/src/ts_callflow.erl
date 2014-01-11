@@ -86,7 +86,7 @@ send_park(#ts_callflow_state{aleg_callid=CallID, my_q=Q, route_req_jobj=JObj
             | wh_api:default_headers(Q, ?APP_NAME, ?APP_VERSION)
            ],
     lager:info("trunkstore knows how to route this call, sending park route response"),
-    wapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, JObj), Resp),
+    kapi_route:publish_resp(wh_json:get_value(<<"Server-ID">>, JObj), Resp),
     _ = amqp_util:bind_q_to_callevt(Q, CallID),
     _ = amqp_util:bind_q_to_callevt(Q, CallID, cdr),
     _ = amqp_util:basic_consume(Q, [{exclusive, false}]), %% need to verify if this step is needed
@@ -99,8 +99,8 @@ wait_for_win(#ts_callflow_state{aleg_callid=CallID}=State) ->
 
         %% call events come from callevt exchange, ignore for now
         {#'basic.deliver'{exchange = <<"targeted">>}, #amqp_msg{payload=Payload}} ->
-            WinJObj = wh_json:decode(Payload),
-            true = wapi_route:win_v(WinJObj),
+            JObj = wh_json:decode(Payload),
+            {'ok', WinJObj} = kapi_route:win_v(JObj),
             CallID = wh_json:get_value(<<"Call-ID">>, WinJObj),
 
             CallctlQ = wh_json:get_value(<<"Control-Queue">>, WinJObj),

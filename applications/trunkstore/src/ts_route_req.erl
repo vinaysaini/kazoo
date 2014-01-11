@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2011-2013, 2600Hz
+%%% @copyright (C) 2011-2014, 2600Hz
 %%% @doc
 %%% Handle route requests off AMQP
 %%% @end
@@ -17,8 +17,8 @@
 init() -> 'ok'.
 
 -spec handle_req(wh_json:object(), wh_proplist()) -> any().
-handle_req(ApiJObj, _Options) ->
-    'true' = wapi_route:req_v(ApiJObj),
+handle_req(JObj, _Options) ->
+    {'ok', ApiJObj} = kapi_route:req_v(JObj),
     CallID = wh_json:get_value(<<"Call-ID">>, ApiJObj),
     put('callid', CallID),
 
