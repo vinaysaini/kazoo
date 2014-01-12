@@ -1,7 +1,7 @@
 %%%-------------------------------------------------------------------
 %%% @copyright (C) 2014, 2600Hz
 %%% @doc
-%%% Route requests, responses, and wins!
+%%% Configuration change notifications
 %%% @end
 %%% @contributors
 %%%   James Aimonetti
