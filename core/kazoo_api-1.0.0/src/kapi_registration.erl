@@ -20,6 +20,18 @@
          ,flush/1, flush/2
          ,flush_v/1, flush_v/2
          ,publish_flush/1, publish_flush/2
+
+         ,query_req/1, query_req/2
+         ,query_req_v/1, query_req_v/2
+         ,publish_query_req/1, publish_query_req/2
+
+         %% ,query_resp/1, query_resp/2
+         %% ,query_resp_v/1, query_resp_v/2
+         %% ,publish_query_resp/2, publish_query_resp/3
+
+         %% ,query_err/1, query_err/2
+         %% ,query_err_v/1, query_err_v/2
+         %% ,publish_query_err/2, publish_query_err/3
         ]).
 
 -include("kazoo_api.hrl").
@@ -209,3 +221,55 @@ get_flush_routing(Prop) when is_list(Prop) ->
 get_flush_routing(JObj) ->
     get_flush_routing(wh_json:get_value(<<"Realm">>, JObj)).
 
+%%--------------------------------------------------------------------
+%% @doc Publish the JSON iolist() to the proper Exchange
+%% @end
+%%--------------------------------------------------------------------
+-spec query_req(api_terms()) -> api_builder_resp().
+-spec query_req(api_terms(), wh_proplist()) -> api_builder_resp().
+query_req(API) -> query_req(API, []).
+
+query_req(Props, Options) when is_list(Props) ->
+    query_req(wh_json:from_list(Props), Options);
+query_req(JObj, Options) ->
+    case query_req_v(JObj, Options) of
+        {'ok', FixedJObj} ->
+            kz_api:build_message(FixedJObj);
+        {'error', Errors} -> {'error', Errors};
+        'false' -> {'error', "API failed validation for query_req"}
+    end.
+
+-spec query_req_v(api_terms()) -> api_validator_resp().
+-spec query_req_v(api_terms(), wh_proplist()) -> api_validator_resp().
+query_req_v(API) -> query_req_v(API, []).
+
+query_req_v(Props, Options) when is_list(Props) ->
+    query_req_v(wh_json:from_list(Props), Options);
+query_req_v(JObj, Options) ->
+    {'ok', Schema} = kz_api:find_schema(<<"reg_query_req">>),
+    jesse:validate_with_schema(Schema, JObj, [{'allowed_errors', 2} | Options]).
+
+-spec publish_query_req(api_terms()) -> 'ok'.
+-spec publish_query_req(api_terms(), ne_binary()) -> 'ok'.
+publish_query_req(API) ->
+    publish_query_req(API, ?DEFAULT_CONTENT_TYPE).
+publish_query_req(API, ContentType) ->
+    {'ok', Payload} = ?MODULE:query_req(API),
+    lager:debug("rk: ~s payload: ~s", [get_query_routing(API), Payload]),
+    amqp_util:callmgr_publish(Payload, ContentType, get_query_routing(API)).
+
+-spec get_query_routing(api_terms()) -> ne_binary().
+get_query_routing(Prop) when is_list(Prop) ->
+    User = props:get_value(<<"Username">>, Prop),
+    Realm = props:get_value(<<"Realm">>, Prop),
+    get_query_routing(Realm, User);
+get_query_routing(JObj) ->
+    User = wh_json:get_value(<<"Username">>, JObj),
+    Realm = wh_json:get_value(<<"Realm">>, JObj),
+    get_query_routing(Realm, User).
+
+-spec get_query_routing(ne_binary(), ne_binary()) -> ne_binary().
+get_query_routing(Realm, 'undefined') ->
+    list_to_binary([?KEY_REG_QUERY, ".", amqp_util:encode(Realm), ".*"]);
+get_query_routing(Realm, User) ->
+    list_to_binary([?KEY_REG_QUERY, ".", amqp_util:encode(Realm), ".", amqp_util:encode(User)]).

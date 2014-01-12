@@ -1,0 +1,36 @@
+{
+    "_id":"reg_query_req"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"Query Registration information"
+    ,"title":"Registration Query Request"
+    ,"exchange":"callmgr"
+    ,"routing_key":"registration.query.{Realm}.{Username}"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["directory"]
+            ,"default":"directory"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["reg_query"]
+            ,"default":"reg_query"
+        }
+        ,"Realm":{
+            "description":"SIP Realm to flush"
+            ,"type":"string"
+        }
+        ,"Username":{
+            "description":"SIP Username to flush"
+            ,"type":"string"
+        }
+        ,"Fields":{
+            "description":"Specific registration fields to return"
+            ,"type":"list"
+        }
+        ,"Count-Only":{
+            "description":"Return just the count of registrations that match"
+            ,"type":"boolean"
+        }
+    }
+}
