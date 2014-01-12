@@ -17,7 +17,9 @@
          ,publish_success/1, publish_success/2
          ,success_keys/0
 
-
+         ,flush/1, flush/2
+         ,flush_v/1, flush_v/2
+         ,publish_flush/1, publish_flush/2
         ]).
 
 -include("kazoo_api.hrl").
@@ -164,9 +166,46 @@ get_query_binding(Props) ->
 
     iolist_to_binary([?KEY_REG_QUERY, Realm, User]).
 
+%%--------------------------------------------------------------------
+%% @doc Publish the JSON iolist() to the proper Exchange
+%% @end
+%%--------------------------------------------------------------------
+-spec flush(api_terms()) -> api_builder_resp().
+-spec flush(api_terms(), wh_proplist()) -> api_builder_resp().
+flush(API) -> flush(API, []).
+
+flush(Props, Options) when is_list(Props) ->
+    flush(wh_json:from_list(Props), Options);
+flush(JObj, Options) ->
+    case flush_v(JObj, Options) of
+        {'ok', FixedJObj} ->
+            kz_api:build_message(FixedJObj);
+        {'error', Errors} -> {'error', Errors};
+        'false' -> {'error', "API failed validation for flush"}
+    end.
+
+-spec flush_v(api_terms()) -> api_validator_resp().
+-spec flush_v(api_terms(), wh_proplist()) -> api_validator_resp().
+flush_v(API) -> flush_v(API, []).
+
+flush_v(Props, Options) when is_list(Props) ->
+    flush_v(wh_json:from_list(Props), Options);
+flush_v(JObj, Options) ->
+    {'ok', Schema} = kz_api:find_schema(<<"reg_flush">>),
+    jesse:validate_with_schema(Schema, JObj, [{'allowed_errors', 2} | Options]).
+
+-spec publish_flush(api_terms()) -> 'ok'.
+-spec publish_flush(api_terms(), ne_binary()) -> 'ok'.
+publish_flush(API) ->
+    publish_flush(API, ?DEFAULT_CONTENT_TYPE).
+publish_flush(API, ContentType) ->
+    {'ok', Payload} = ?MODULE:flush(API),
+    amqp_util:callmgr_publish(Payload, ContentType, get_flush_routing(API)).
+
 get_flush_routing(Realm) when is_binary(Realm) ->
     <<"registration.flush.", (amqp_util:encode(Realm))/binary>>;
 get_flush_routing(Prop) when is_list(Prop) ->
     get_flush_routing(props:get_value(<<"Realm">>, Prop));
 get_flush_routing(JObj) ->
     get_flush_routing(wh_json:get_value(<<"Realm">>, JObj)).
+

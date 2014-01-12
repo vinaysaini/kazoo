@@ -129,8 +129,8 @@ reg_query(JObj, _Props) ->
     _ = wh_util:put_callid(JObj),
     maybe_resp_to_query(JObj).
 
-reg_flush(JObj, _Props) ->
-    'true' = wapi_registration:flush_v(JObj),
+reg_flush(APIJObj, _Props) ->
+    {'ok', JObj} = kapi_registration:flush_v(APIJObj),
     lager:debug("recv req to flush ~s @ ~s", [wh_json:get_value(<<"Username">>, JObj)
                                               ,wh_json:get_value(<<"Realm">>, JObj)
                                              ]),

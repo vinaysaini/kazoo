@@ -1,0 +1,29 @@
+{
+    "_id":"reg_flush"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"Flush SIP registrations"
+    ,"title":"SIP Registration Flushes"
+    ,"exchange":"callmgr"
+    ,"routing_key":"registration.flush.{Realm}"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["directory"]
+            ,"default":"directory"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["reg_flush"]
+            ,"default":"reg_flush"
+        }
+        ,"Realm":{
+            "description":"SIP Realm to flush"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Username":{
+            "description":"SIP Username to flush"
+            ,"type":"string"
+        }
+    }
+}
