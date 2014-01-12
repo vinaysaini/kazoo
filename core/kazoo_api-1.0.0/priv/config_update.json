@@ -1,0 +1,55 @@
+{
+    "_id":"config_update"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"Configuration was changed"
+    ,"title":"Configuration Update"
+    ,"exchange":"configuration"
+    ,"routing_key":"{Event-Name}.{Database}.{Type}.{ID}"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["configuration"]
+            ,"default":"configuration"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["doc_created", "doc_edited", "doc_deleted"]
+            ,"required":true
+        }
+        ,"ID":{
+            "description":"Document ID"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Rev":{
+            "description":"Revision number of document"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Database":{
+            "description":"Database the document is part of"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Account-ID":{
+            "description":"ID of the account the document is related to (if any)"
+            ,"type":"string"
+        }
+        ,"Type":{
+            "description":"The type of the document (pvt_*)"
+            ,"type":"string"
+        }
+        ,"Date-Created":{
+            "description":"Timestamp (gregorian) of document creation"
+            ,"type":"string"
+        }
+        ,"Date-Modified":{
+            "description":"Timestamp (gregorian) of document modification"
+            ,"type":"string"
+        }
+        ,"Doc":{
+            "description":"The JSON document that changed"
+            ,"type":"object"
+        }
+    }
+}

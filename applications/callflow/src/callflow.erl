@@ -56,7 +56,8 @@ stop() ->
 %%--------------------------------------------------------------------
 -spec start_deps() -> 'ok'.
 start_deps() ->
-    whistle_apps_deps:ensure(?MODULE), % if started by the whistle_controller, this will exist
+    %% if started by the whistle_controller, this will exist
+    whistle_apps_deps:ensure(?MODULE),
     _ = [wh_util:ensure_started(App) || App <- ['crypto'
                                                 ,'lager'
                                                 ,'whistle_amqp'
@@ -76,7 +77,7 @@ declare_exchanges() ->
     _ = wapi_acdc_queue:declare_exchanges(), %% TODO: decouple
     _ = wapi_call:declare_exchanges(),
     _ = wapi_callflow:declare_exchanges(),
-    _ = wapi_conf:declare_exchanges(),
+    _ = kapi_configuration:declare_exchanges(),
     _ = wapi_conference:declare_exchanges(),
     _ = wapi_dialplan:declare_exchanges(),
     _ = wapi_fax:declare_exchanges(), %% TODO: decouple

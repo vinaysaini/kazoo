@@ -291,8 +291,8 @@ handle_agent_message(JObj, Props, <<"connect_timeout">>) ->
 handle_agent_message(_, _, _EvtName) ->
     lager:debug("not handling agent event ~s", [_EvtName]).
 
-handle_config_change(JObj, _Props) ->
-    'true' = wapi_conf:doc_update_v(JObj),
+handle_config_change(APIJObj, _Props) ->
+    {'ok', JObj} = kapi_configuration:doc_update_v(APIJObj),
 
     handle_change(JObj, wh_json:get_value(<<"Type">>, JObj)).
 
@@ -416,8 +416,6 @@ presence_id(JObj, AgentId) ->
     lager:debug("find presence in ~p", [JObj]),
     wh_json:get_value(<<"Presence-ID">>, JObj, AgentId).
 
-presence_state(JObj) ->
-    presence_state(JObj, 'undefined').
 presence_state(JObj, State) ->
     wh_json:get_value(<<"Presence-State">>, JObj, State).
 

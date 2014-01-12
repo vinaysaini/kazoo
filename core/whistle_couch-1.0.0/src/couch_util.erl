@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2011-2013, 2600Hz
+%%% @copyright (C) 2011-2014, 2600Hz
 %%% @doc
 %%% Util functions used by whistle_couch
 %%% @end
@@ -720,10 +720,9 @@ publish(Action, Db, Doc) ->
          ,{<<"Date-Modified">>, wh_json:get_binary_value(<<"pvt_created">>, Doc)}
          ,{<<"Date-Created">>, wh_json:get_binary_value(<<"pvt_modified">>, Doc)}
          | wh_api:default_headers(<<"configuration">>, <<"doc_", (wh_util:to_binary(Action))/binary>>
-                                      ,<<"whistle_couch">>, <<"1.0.0">>)
+                                  ,<<"whistle_couch">>, <<"1.0.0">>)
         ],
-    Fun = fun(P) -> wapi_conf:publish_doc_update(Action, Db, Type, Id, P) end,
-    whapps_util:amqp_pool_send(Props, Fun).
+    whapps_util:amqp_pool_send(Props, fun kapi_configuration:publish_doc_update/1).
 
 doc_rev(Doc) ->
     wh_json:get_first_defined([<<"_rev">>, <<"rev">>]

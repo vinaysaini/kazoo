@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(kapi_authn).
 
--compile({'no_auto_import', [error/1]}).
+-compile({'no_auto_import', [error/1, error/2]}).
 
 -export([req/1, req/2, req_v/1, req_v/2
          ,resp/1, resp/2, resp_v/1, resp_v/2

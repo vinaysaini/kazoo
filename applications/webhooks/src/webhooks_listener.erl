@@ -115,18 +115,18 @@ handle_config(JObj, Props) ->
                   ,wh_json:get_value(<<"Event-Name">>, JObj)
                  ).
 handle_config(JObj, Srv, <<"doc_created">>) ->
-    case wapi_conf:get_doc(JObj) of
+    case kapi_configuration:api_doc(JObj) of
         'undefined' -> find_and_add_hook(JObj, Srv);
         Hook -> load_hook(Srv, Hook)
     end;
 handle_config(JObj, Srv, <<"doc_edited">>) ->
-    case wapi_conf:get_doc(JObj) of
+    case kapi_configuration:api_doc(JObj) of
         'undefined' -> find_and_update_hook(JObj, Srv);
         Hook ->
             gen_listener:cast(Srv, {'update_hook', jobj_to_rec(Hook)})
     end;
 handle_config(JObj, Srv, <<"doc_deleted">>) ->
-    case wapi_conf:get_doc(JObj) of
+    case kapi_configuration:api_doc(JObj) of
         'undefined' -> find_and_remove_hook(JObj, Srv);
         Hook ->
             gen_listener:cast(Srv, {'remove_hook', jobj_to_rec(Hook)})
@@ -164,7 +164,7 @@ find_and_remove_hook(JObj, Srv) ->
                        {'error', _}.
 find_hook(JObj) ->
     couch_mgr:open_doc(?KZ_WEBHOOKS_DB
-                       ,wapi_conf:get_id(JObj)
+                       ,kapi_configuration:api_id(JObj)
                       ).
 
 -spec handle_call_event(wh_json:object(), wh_proplist()) -> 'ok'.

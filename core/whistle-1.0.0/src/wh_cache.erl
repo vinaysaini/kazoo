@@ -291,11 +291,11 @@ wait_for_key_local(Srv, Key, Timeout) ->
     end.
 
 -spec handle_document_change(wh_json:object(), wh_proplist()) -> 'ok'.
-handle_document_change(JObj, Props) ->
-    'true' = wapi_conf:doc_update_v(JObj),
+handle_document_change(APIJObj, Props) ->
+    {'ok', JObj} = kapi_configuration:doc_update_v(APIJObj),
     Srv = props:get_value('server', Props),
-    Id = wh_json:get_value(<<"ID">>, JObj),
-    Db = wh_json:get_value(<<"Database">>, JObj),
+    Id = kapi_configuration:api_id(JObj),
+    Db = kapi_configuration:api_db(JObj),
     gen_listener:cast(Srv, {'change', {'db', Db, Id}}).
 
 %%%===================================================================
@@ -315,7 +315,7 @@ handle_document_change(JObj, Props) ->
 %%--------------------------------------------------------------------
 init([Name, ExpirePeriod, Props]) ->
     put('callid', Name),
-    wapi_conf:declare_exchanges(),
+    kapi_configuration:declare_exchanges(),
     _ = erlang:send_after(ExpirePeriod, self(), {'expire', ExpirePeriod}),
     Tab = ets:new(Name, ['set', 'protected', 'named_table', {'keypos', #cache_obj.key}]),
     _ = case props:get_value('new_node_flush', Props) of

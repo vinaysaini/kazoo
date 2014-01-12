@@ -44,7 +44,7 @@ start() ->
 %% @end
 %%--------------------------------------------------------------------
 -spec stop() -> 'ok'.
-stop() -> 
+stop() ->
     exit(whereis('acdc_sup'), 'shutdown'),
     'ok'.
 
@@ -77,7 +77,7 @@ declare_exchanges() ->
     _ = wapi_acdc_queue:declare_exchanges(),
     _ = wapi_acdc_stats:declare_exchanges(),
     _ = wapi_call:declare_exchanges(),
-    _ = wapi_conf:declare_exchanges(),
+    _ = kapi_configuration:declare_exchanges(),
     _ = wapi_dialplan:declare_exchanges(),
     _ = wapi_notifications:declare_exchanges(),
     _ = wapi_resource:declare_exchanges(),

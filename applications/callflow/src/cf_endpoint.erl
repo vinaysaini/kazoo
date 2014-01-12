@@ -344,12 +344,9 @@ flush(Db, Id) ->
          ,{<<"Rev">>, Rev}
          ,{<<"Type">>, <<"device">>}
          | wh_api:default_headers(<<"configuration">>, <<"doc_edited">>
-                                      ,?APP_NAME, ?APP_VERSION)
+                                  ,?APP_NAME, ?APP_VERSION)
         ],
-    Fun = fun(P) ->
-                  wapi_conf:publish_doc_update('edited', Db, <<"device">>, Id, P)
-          end,
-    whapps_util:amqp_pool_send(Props, Fun).
+    whapps_util:amqp_pool_send(Props, fun kapi_configuration:publish_doc_update/1).
 
 %%--------------------------------------------------------------------
 %% @public

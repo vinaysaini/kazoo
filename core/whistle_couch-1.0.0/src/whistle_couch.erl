@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2010-2012, VoIP INC
+%%% @copyright (C) 2010-2014, 2600Hz INC
 %%% @doc
 %%%
 %%% @end
@@ -75,5 +75,5 @@ start_deps() ->
 %%--------------------------------------------------------------------
 -spec declare_exchanges() -> 'ok'.
 declare_exchanges() ->
-    _ = wapi_conf:declare_exchanges(),
+    _ = kapi_configuration:declare_exchanges(),
     kapi_self:declare_exchanges().

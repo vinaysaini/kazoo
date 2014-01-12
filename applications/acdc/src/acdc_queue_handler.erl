@@ -53,8 +53,8 @@ handle_member_retry(JObj, Props) ->
     'true' = wapi_acdc_queue:member_connect_retry_v(JObj),
     acdc_queue_fsm:member_connect_retry(props:get_value('fsm_pid', Props), JObj).
 
-handle_config_change(JObj, Props) ->
-    'true' = wapi_conf:doc_update_v(JObj),
+handle_config_change(APIJObj, Props) ->
+    {'ok', JObj} = kapi_configuration:doc_update_v(APIJObj),
 
     acdc_queue_manager:handle_config_change(props:get_value('server', Props), JObj),
 
