@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2013, 2600Hz
+%%% @copyright (C) 2013-2014, 2600Hz
 %%% @doc
 %%% Handles authentication requests, responses, queue bindings
 %%% @end
@@ -10,6 +10,7 @@
 
 -export([build_message/1
          ,find_schema/1
+         ,flush_schema/1
          ,init_schemas/0
         ]).
 
@@ -18,6 +19,9 @@
 -spec build_message(wh_json:object()) -> {'ok', iolist()}.
 build_message(JObj) ->
     {'ok', wh_json:encode(JObj)}.
+
+flush_schema(SchemaName) ->
+    wh_cache:erase_local(?API_CACHE, SchemaName).
 
 find_schema(SchemaName) ->
     case wh_cache:fetch_local(?API_CACHE, SchemaName) of
