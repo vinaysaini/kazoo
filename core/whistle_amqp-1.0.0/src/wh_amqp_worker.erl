@@ -342,6 +342,9 @@ handle_call({'request', ReqProp, PublishFun, VFun, Timeout}
                }
              ,'hibernate'
             };
+        {'error', Err} ->
+            lager:debug("error sending request: ~p", [Err]),
+            {'reply', {'error', Err}, reset(State), 'hibernate'};
         {'EXIT', Err} ->
             lager:debug("failed to send request: ~p", [Err]),
             {'reply', {'error', Err}, reset(State), 'hibernate'}
