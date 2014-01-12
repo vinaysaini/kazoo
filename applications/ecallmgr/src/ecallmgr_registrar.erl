@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2011-2013, 2600Hz INC
+%%% @copyright (C) 2011-2014, 2600Hz INC
 %%% @doc
 %%% Listener for reg_success, and reg_query AMQP requests
 %%% @end
@@ -111,8 +111,8 @@ start_link() ->
                                                          ], []).
 
 -spec reg_success(wh_json:object(), wh_proplist()) -> 'ok'.
-reg_success(JObj, _Props) ->
-    'true' = wapi_registration:success_v(JObj),
+reg_success(APIJObj, _Props) ->
+    {'ok', JObj} = kapi_registration:success_v(APIJObj),
     _ = wh_util:put_callid(JObj),
     Registration = create_registration(JObj),
     gen_server:cast(?MODULE, {'insert_registration', Registration}),
@@ -249,13 +249,15 @@ handle_reg_success(Node, Props) ->
                         ,{<<"FreeSWITCH-Nodename">>, wh_util:to_binary(Node)}
                         | wh_api:default_headers(?APP_NAME, ?APP_VERSION)
                        ]
-                      ,wapi_registration:success_keys()),
+                      ,kapi_registration:success_keys()),
     lager:debug("sending successful registration for ~s@~s"
-                ,[props:get_value(<<"Username">>, Req), props:get_value(<<"Realm">>, Req)]
+                ,[props:get_value(<<"Username">>, Req)
+                  ,props:get_value(<<"Realm">>, Req)
+                 ]
                ),
     wh_amqp_worker:cast(?ECALLMGR_AMQP_POOL
                         ,Req
-                        ,fun wapi_registration:publish_success/1
+                        ,fun kapi_registration:publish_success/1
                        ).
 
 %%%===================================================================

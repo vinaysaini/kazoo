@@ -1,0 +1,117 @@
+{
+    "_id":"reg_success"
+    ,"$schema":"http://json-schema.org/draft-04/schema#"
+    ,"description":"SIP Registration information"
+    ,"title":"SIP Registration"
+    ,"exchange":"callmgr"
+    ,"routing_key":"registration.success.{Realm}.{Username}"
+    ,"properties":{
+        "Event-Category":{
+            "type":"string"
+            ,"enum":["directory"]
+            ,"default":"directory"
+        }
+        ,"Event-Name":{
+            "type":"string"
+            ,"enum":["reg_success"]
+            ,"default":"reg_success"
+        }
+        ,"Event-Timestamp":{
+            "description":"Timestamp (gregorian) of the registration"
+            ,"type":"integer"
+            ,"required":true
+        }
+        ,"Contact":{
+            "description":"SIP Contact information"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Expires":{
+            "description":"Time, in seconds, the registration is valid for"
+            ,"type":"integer"
+            ,"required":true
+        }
+        ,"Username":{
+            "description":"SIP Username"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Realm":{
+            "description":"SIP Realm"
+            ,"type":"string"
+            ,"required":true
+        }
+        ,"Status":{
+            "description":""
+            ,"type":"string"
+        }
+        ,"User-Agent":{
+            "description":"User Agent string from the device"
+            ,"type":"string"
+        }
+        ,"Call-ID":{
+            "description":"Unique ID of the registration attempt"
+            ,"type":"string"
+        }
+        ,"Profile-Name":{
+            "description":""
+            ,"type":"string"
+        }
+        ,"Presence-Hosts":{
+            "description":""
+            ,"type":"string"
+        }
+        ,"Account-ID":{
+            "description":"Account ID of the device"
+            ,"type":"string"
+        }
+        ,"Account-DB":{
+            "description":"Account DB of the device"
+            ,"type":"string"
+        }
+        ,"From-User":{
+            "description":"SIP From Username"
+            ,"type":"string"
+        }
+        ,"From-Host":{
+            "description":"SIP From Host"
+            ,"type":"string"
+        }
+        ,"To-User":{
+            "description":"SIP To Username"
+            ,"type":"string"
+        }
+        ,"To-Host":{
+            "description":"SIP To Host"
+            ,"type":"string"
+        }
+        ,"RPid":{
+            "description":"Remote Party ID"
+            ,"type":"string"
+        }
+        ,"Authorizing-ID":{
+            "description":"ID of the object that authorized the registration"
+            ,"type":"string"
+        }
+        ,"Switch-Hostname":{
+            "description":"Hostname of the media switch"
+            ,"type":"string"
+        }
+        ,"Switch-Nodename":{
+            "description":"Erlang node name of the media switch"
+            ,"type":"string"
+        }
+        ,"Network-IP":{
+            "description":""
+            ,"type":"ipv4"
+        }
+        ,"Network-Port":{
+            "description":""
+            ,"type":"integer"
+        }
+        ,"Suppress-Unregister-Notify":{
+            "description":"Whether to notify when device deregisters"
+            ,"type":"boolean"
+        }
+    }
+}
