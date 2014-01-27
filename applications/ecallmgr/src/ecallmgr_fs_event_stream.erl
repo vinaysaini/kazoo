@@ -244,6 +244,8 @@ process_event(?CHANNEL_MOVE_COMPLETE_EVENT_BIN, _, Props, Node) ->
               );
 process_event(<<"sofia::register">>, _UUID, Props, Node) ->
     gproc:send({'p', 'l', ?REGISTER_SUCCESS_REG}, ?REGISTER_SUCCESS_MSG(Node, Props));
+process_event(<<"rtmp::register">>, _UUID, Props, Node) ->
+    gproc:send({'p', 'l', ?REGISTER_SUCCESS_REG}, ?REGISTER_SUCCESS_MSG(Node, Props));
 process_event(_, _, _, _) ->
     'ok'.
 

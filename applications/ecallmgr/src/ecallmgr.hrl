@@ -284,6 +284,7 @@
                            ,'sofia::transferor', 'sofia::transferee'
                            ,'sofia::replaced', 'sofia::register'
                            ,'conference::maintenance'
+                           ,'rtmp::register', 'rtmp::logout'
                            ,?CHANNEL_MOVE_RELEASED_EVENT
                            ,?CHANNEL_MOVE_COMPLETE_EVENT
                           ]).

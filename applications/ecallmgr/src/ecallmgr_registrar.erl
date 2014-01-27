@@ -238,24 +238,25 @@ flush(Username, Realm) ->
 
 -spec handle_reg_success(atom(), wh_proplist()) -> 'ok'.
 handle_reg_success(Node, Props) ->
-    put('callid', props:get_first_defined([<<"Call-ID">>, <<"call-id">>], Props, 'reg_success')),
+    NormalizedProps = normalize_reg_props(Props),
+    put('callid', props:get_value(<<"Call-ID">>, NormalizedProps, 'reg_success')),
     Req = lists:foldl(fun(K, Acc) ->
-                              case props:get_first_defined([wh_util:to_lower_binary(K), K], Props) of
+                              case props:get_first_defined([wh_util:to_lower_binary(K), K], NormalizedProps) of
                                   'undefined' -> Acc;
                                   V -> [{K, V} | Acc]
                               end
                       end
-                      ,[{<<"Event-Timestamp">>, round(wh_util:current_tstamp())}
-                        ,{<<"FreeSWITCH-Nodename">>, wh_util:to_binary(Node)}
-                        | wh_api:default_headers(?APP_NAME, ?APP_VERSION)
-                       ]
-                      ,wapi_registration:success_keys()),
+                     ,[{<<"Event-Timestamp">>, round(wh_util:current_tstamp())}
+                      ,{<<"FreeSWITCH-Nodename">>, wh_util:to_binary(Node)}
+                       | wh_api:default_headers(?APP_NAME, ?APP_VERSION)
+                      ]
+                     ,wapi_registration:success_keys()),
     lager:debug("sending successful registration for ~s@~s"
-                ,[props:get_value(<<"Username">>, Req), props:get_value(<<"Realm">>, Req)]
+               ,[props:get_value(<<"Username">>, Req), props:get_value(<<"Realm">>, Req)]
                ),
     wh_amqp_worker:cast(?ECALLMGR_AMQP_POOL
-                        ,Req
-                        ,fun wapi_registration:publish_success/1
+                       ,Req
+                       ,fun wapi_registration:publish_success/1
                        ).
 
 %%%===================================================================
@@ -402,6 +403,66 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+-spec normalize_reg_props(wh_json:object()) -> wh_json:object().
+normalize_reg_props(Props) ->
+    Routines = [fun normalize_callid/1
+                ,fun normalize_contact_uri/1
+                ,fun normalize_expires/1
+                ,fun normalize_username/1
+                ,fun normalize_realm/1
+                ,fun normalize_user_agent/1
+               ],
+    lists:foldl(fun(F, R) -> F(R) end, Props, Routines).
+
+-spec normalize_callid(wh_json:object()) -> wh_json:object().  
+normalize_callid(Props) ->
+    CallId = props:get_first_defined([<<"Call-ID">>, <<"call-id">>, <<"RTMP-Session-ID">>], Props),
+    props:set_value(<<"Call-ID">>, CallId, Props).
+
+-spec normalize_contact_uri(wh_json:object()) -> wh_json:object().  
+normalize_contact_uri(Props) ->
+    ContactUri = case props:get_value(<<"Event-Calling-Function">>, Props) of
+                     <<"rtmp_add_registration">> ->
+                         list_to_binary([<<"rtmp/">>
+                                         ,props:get_value(<<"RTMP-Session-ID">>, Props)
+                                         ,<<"/">>
+                                         ,props:get_value(<<"User">>, Props)
+                                         ,<<"@">>
+                                         ,props:get_value(<<"Domain">>, Props)
+                                        ]);
+                     <<"sofia_reg_handle_register">> -> 
+                         props:get_value(<<"contact">>, Props);
+                     'undefined' ->
+                         <<>>
+    end,
+    props:set_value(<<"contact">>, ContactUri, Props).
+
+-spec normalize_expires(wh_json:object()) -> wh_json:object().  
+normalize_expires(Props) ->
+    Expires = props:get_first_defined([<<"expires">>], Props, 600),
+    props:set_value(<<"expires">>, Expires, Props).
+
+-spec normalize_username(wh_json:object()) -> wh_json:object().  
+normalize_username(Props) ->  
+    Username = props:get_first_defined([<<"Username">>, <<"User">>], Props),
+    props:set_value(<<"Username">>, Username, Props).
+
+-spec normalize_realm(wh_json:object()) -> wh_json:object().  
+normalize_realm(Props) ->
+    Realm = props:get_first_defined([<<"Realm">>, <<"Domain">>], Props),
+    props:set_value(<<"Realm">>, Realm, Props).
+
+-spec normalize_user_agent(wh_json:object()) -> wh_json:object().  
+normalize_user_agent(Props) ->
+    case props:get_value(<<"Event-Calling-Function">>, Props) of
+        <<"rtmp_add_registration">> ->
+            props:set_value(<<"user-agent">>, <<"rtmp-client">>, Props);
+        <<"sofia_reg_handle_register">> -> 
+            Props;
+        'undefined' ->
+            Props
+    end.
+
 -spec fetch_contact(ne_binary(), ne_binary()) -> {'ok', ne_binary()} | {'error', 'not_found'}.
 fetch_contact(Username, Realm) ->
     Reg = [{<<"Username">>, Username}
@@ -587,6 +648,8 @@ create_registration(JObj) ->
                     }.
 
 -spec fix_contact(ne_binary()) -> ne_binary().
+fix_contact(<<"rtmp://", RTMPContactUrl/binary>>) ->
+    <<"rtmp://", RTMPContactUrl/binary>>;
 fix_contact(Contact) ->
     [User, AfterAt] = binary:split(Contact, <<"@">>), % only one @ allowed
     AfterUnquoted = wh_util:to_binary(mochiweb_util:unquote(AfterAt)),
@@ -809,6 +872,20 @@ print_summary(Match) ->
 print_summary('$end_of_table', Count) ->
     io:format("+-----------------------------------------------+------------------------+------------------------+----------------------------------+------+~n"),
     io:format("Found ~p registrations~n", [Count]);
+print_summary({[#registration{contact = <<"rtmp/", _/binary>> = Contact
+                              ,username=Username
+                              ,realm=Realm
+                              ,expires=Expires
+                              ,last_registration=LastRegistration
+                              ,call_id=CallId
+                             }
+                ], Continuation}
+             ,Count) ->
+    User = <<Username/binary, "@", Realm/binary>>,
+    Remaining = (LastRegistration + Expires) - wh_util:current_tstamp(),
+    io:format("| ~-45s | ~-22s | ~-22s | ~-32s | ~-4B |~n"
+             ,[User, Contact, <<>>, CallId, Remaining]),
+    print_summary(ets:select(Continuation), Count + 1);
 print_summary({[#registration{username=Username
                               ,realm=Realm
                               ,contact=Contact
@@ -827,7 +904,7 @@ print_summary({[#registration{username=Username
             {'match', [Host]} ->
                 io:format("| ~-45s | ~-22s | ~-22s | ~-32s | ~-4B |~n"
                           ,[User, Host, <<>>, CallId, Remaining]);
-            _Else -> 'ok'
+            _Else -> io:format("Contact ~s~n", [Contact])
         end,
     print_summary(ets:select(Continuation), Count + 1).
 
