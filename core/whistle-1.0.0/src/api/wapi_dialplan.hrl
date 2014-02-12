@@ -75,7 +75,7 @@
                ,<<"Enable-T38-Gateway">>
          ]).
 -define(BRIDGE_REQ_ENDPOINT_VALUES, [?INVITE_FORMAT_TUPLE
-                                     ,{<<"Endpoint-Type">>, [<<"sip">>, <<"freetdm">>, <<"skype">>]}
+                                     ,{<<"Endpoint-Type">>, [<<"sip">>, <<"freetdm">>, <<"skype">>, <<"rtmp">>]}
                                      ,{<<"Enable-T38-Gateway">>, [<<"self">>, <<"peer">>]}
                                      ,{<<"SIP-Transport">>, [<<"udp">>, <<"tcp">>, <<"tls">>, <<"sctp">>]}
                                     ]).

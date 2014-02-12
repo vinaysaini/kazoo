@@ -102,7 +102,7 @@
 %% Originate Endpoints
 -define(ORIGINATE_REQ_ENDPOINT_HEADERS, [<<"Invite-Format">>]).
 -define(OPTIONAL_ORIGINATE_REQ_ENDPOINT_HEADERS, fun() -> wapi_dialplan:optional_bridge_req_endpoint_headers() end()).
--define(ORIGINATE_REQ_ENDPOINT_VALUES, [{<<"Endpoint-Type">>, [<<"sip">>, <<"freetdm">>]}
+-define(ORIGINATE_REQ_ENDPOINT_VALUES, [{<<"Endpoint-Type">>, [<<"sip">>, <<"freetdm">>, <<"rtmp">>]}
                                        ]).
 -define(ORIGINATE_REQ_ENDPOINT_TYPES, [{<<"SIP-Headers">>, fun wh_json:is_json_object/1}
                                        ,{<<"Custom-Channel-Vars">>, fun wh_json:is_json_object/1}

@@ -36,6 +36,8 @@
 
 -include("ecallmgr.hrl").
 
+-define(CONTACT_REGEX, <<"^.*?:.*@([0-9.:]*)(?:;transport=WS)?(?:;fs_path=.*?:([0-9.:]*))*">>).
+
 -type send_cmd_ret() :: fs_sendmsg_ret() | fs_api_ret().
 -export_type([send_cmd_ret/0]).
 
@@ -654,10 +656,12 @@ get_sip_contact(#bridge_endpoint{ip_address='undefined'
                                  ,username=Username
                                 }) ->
     {'ok', Contact} = ecallmgr_registrar:lookup_contact(Realm, Username),
+    lager:debug("bwann - CONTACT String: ~p", [Contact]),
     binary:replace(Contact, <<">">>, <<>>);
 get_sip_contact(#bridge_endpoint{ip_address=IPAddress}) -> IPAddress.
 
 -spec maybe_clean_contact(ne_binary(), bridge_endpoint()) -> ne_binary().
+maybe_clean_contact(<<"rtmp/", _/binary>>=Contact, _Endpoint) -> Contact;
 maybe_clean_contact(<<"sip:", Contact/binary>>, Endpoint) ->
     maybe_clean_contact(Contact, Endpoint);
 maybe_clean_contact(Contact, #bridge_endpoint{invite_format = <<"route">>}) ->
@@ -666,6 +670,7 @@ maybe_clean_contact(Contact, _) ->
     re:replace(Contact, <<"^.*?[^=]sip:">>, <<>>, [{'return', 'binary'}]).
 
 -spec ensure_username_present(ne_binary(), bridge_endpoint()) -> ne_binary().
+ensure_username_present(<<"rtmp/", _/binary>>=Contact, _Endpoint) -> Contact;
 ensure_username_present(Contact, #bridge_endpoint{invite_format = <<"route">>}) ->
     Contact;
 ensure_username_present(Contact, Endpoint) ->
@@ -681,7 +686,16 @@ guess_username(#bridge_endpoint{user=User}) when is_binary(User) -> User;
 guess_username(_) -> <<"kazoo">>.
 
 -spec maybe_replace_fs_path(ne_binary(), bridge_endpoint()) -> ne_binary().
-maybe_replace_fs_path(Contact, #bridge_endpoint{proxy_address='undefined'}) -> Contact;
+maybe_replace_fs_path(<<"rtmp/", _/binary>>=Contact, _Endpoint) -> Contact;
+maybe_replace_fs_path(Contact, #bridge_endpoint{proxy_address='undefined'}) -> 
+    NewContact = case re:run(Contact, ?CONTACT_REGEX, [{'capture', 'all_but_first', 'binary'}]) of
+                     {'match', [_Host, Proxy]} ->
+                         <<Contact/binary, ";fs_path='sip:", Proxy/binary, "'">>;
+                     {'match', _} -> Contact;
+                     _Else -> Contact
+                 end,
+    lager:debug("bwann - OLDCONTACT: ~p NEWCONTACT: ~p", [Contact, NewContact]),
+    NewContact; 
 maybe_replace_fs_path(Contact, #bridge_endpoint{proxy_address = <<"sip:", _/binary>> = Proxy}) ->
     case re:replace(Contact, <<";fs_path=[^;?]*">>, <<";fs_path=", Proxy/binary>>, [{'return', 'binary'}]) of
         Contact ->
@@ -693,6 +707,7 @@ maybe_replace_fs_path(Contact, #bridge_endpoint{proxy_address=Proxy}=Endpoint) -
     maybe_replace_fs_path(Contact, Endpoint#bridge_endpoint{proxy_address = <<"sip:", Proxy/binary>>}).
 
 -spec maybe_replace_transport(ne_binary(), bridge_endpoint()) -> ne_binary().
+maybe_replace_transport(<<"rtmp/", _/binary>>=Contact, _Endpoint) -> Contact;
 maybe_replace_transport(Contact, #bridge_endpoint{transport='undefined'}) -> Contact;
 maybe_replace_transport(Contact, #bridge_endpoint{transport=Transport}) ->
     case re:replace(Contact, <<";transport=[^;?]*">>, <<";transport=", Transport/binary>>, [{'return', 'binary'}]) of
@@ -703,6 +718,7 @@ maybe_replace_transport(Contact, #bridge_endpoint{transport=Transport}) ->
     end.
 
 -spec maybe_format_user(ne_binary(), bridge_endpoint()) -> ne_binary().
+maybe_format_user(<<"rtmp/", _/binary>>=Contact, _Endpoint) -> Contact;
 maybe_format_user(Contact, #bridge_endpoint{invite_format = <<"username">>
                                             ,user=User
                                            }) when User =/= 'undefined' ->
@@ -723,6 +739,7 @@ maybe_format_user(Contact, _) -> Contact.
 
 -spec maybe_set_interface(ne_binary(), bridge_endpoint()) -> ne_binary().
 maybe_set_interface(<<"sofia/", _/binary>>=Contact, _) -> Contact;
+maybe_set_interface(<<"rtmp/", _/binary>>=Contact, _) -> Contact;
 maybe_set_interface(<<"loopback/", _/binary>>=Contact, _) -> Contact;
 maybe_set_interface(Contact, #bridge_endpoint{sip_interface='undefined'}) ->
     <<?SIP_INTERFACE, Contact/binary>>;

@@ -57,7 +57,7 @@
 -define(REG_QUEUE_NAME, <<>>).
 -define(REG_QUEUE_OPTIONS, []).
 -define(REG_CONSUME_OPTIONS, []).
--define(SUMMARY_REGEX, <<"^.*?:.*@([0-9.:]*)(?:;fs_path=.*?:([0-9.:]*))*">>).
+-define(SUMMARY_REGEX, <<"^.*?:.*@([0-9.:]*)(?:;transport=WS)?(?:;fs_path=.*?:([0-9.:]*))*">>).
 
 -record(state, {started = wh_util:current_tstamp()}).
 
@@ -238,6 +238,7 @@ flush(Username, Realm) ->
 
 -spec handle_reg_success(atom(), wh_proplist()) -> 'ok'.
 handle_reg_success(Node, Props) ->
+    lager:debug("bwann - kamailio reg message ~p", [Props]),
     NormalizedProps = normalize_reg_props(Props),
     put('callid', props:get_value(<<"Call-ID">>, NormalizedProps, 'reg_success')),
     Req = lists:foldl(fun(K, Acc) ->
@@ -247,10 +248,10 @@ handle_reg_success(Node, Props) ->
                               end
                       end
                      ,[{<<"Event-Timestamp">>, round(wh_util:current_tstamp())}
-                      ,{<<"FreeSWITCH-Nodename">>, wh_util:to_binary(Node)}
+                       ,{<<"FreeSWITCH-Nodename">>, wh_util:to_binary(Node)}
                        | wh_api:default_headers(?APP_NAME, ?APP_VERSION)
                       ]
-                     ,wapi_registration:success_keys()),
+                      ,wapi_registration:success_keys()),
     lager:debug("sending successful registration for ~s@~s"
                ,[props:get_value(<<"Username">>, Req), props:get_value(<<"Realm">>, Req)]
                ),
@@ -627,6 +628,7 @@ registration_id(Username, Realm) ->
 
 -spec create_registration(wh_json:object()) -> registration().
 create_registration(JObj) ->
+    lager:debug("bwann - register data: ~p", [JObj]),
     Username = wh_json:get_value(<<"Username">>, JObj),
     Realm = wh_json:get_value(<<"Realm">>, JObj),
     Reg = existing_or_new_registration(Username, Realm),
@@ -897,6 +899,7 @@ print_summary({[#registration{username=Username
               ,Count) ->
     User = <<Username/binary, "@", Realm/binary>>,
     Remaining = (LastRegistration + Expires) - wh_util:current_tstamp(),
+    lager:debug("bwann - Contact String: ~p", [Contact]),
     _ = case re:run(Contact, ?SUMMARY_REGEX, [{'capture', 'all_but_first', 'binary'}]) of
             {'match', [Host, Path]} ->
                 io:format("| ~-45s | ~-22s | ~-22s | ~-32s | ~-4B |~n"
