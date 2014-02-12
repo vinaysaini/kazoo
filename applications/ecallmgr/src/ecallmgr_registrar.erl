@@ -238,7 +238,6 @@ flush(Username, Realm) ->
 
 -spec handle_reg_success(atom(), wh_proplist()) -> 'ok'.
 handle_reg_success(Node, Props) ->
-    lager:debug("bwann - kamailio reg message ~p", [Props]),
     NormalizedProps = normalize_reg_props(Props),
     put('callid', props:get_value(<<"Call-ID">>, NormalizedProps, 'reg_success')),
     Req = lists:foldl(fun(K, Acc) ->
@@ -248,10 +247,10 @@ handle_reg_success(Node, Props) ->
                               end
                       end
                      ,[{<<"Event-Timestamp">>, round(wh_util:current_tstamp())}
-                       ,{<<"FreeSWITCH-Nodename">>, wh_util:to_binary(Node)}
+                      ,{<<"FreeSWITCH-Nodename">>, wh_util:to_binary(Node)}
                        | wh_api:default_headers(?APP_NAME, ?APP_VERSION)
                       ]
-                      ,wapi_registration:success_keys()),
+                     ,wapi_registration:success_keys()),
     lager:debug("sending successful registration for ~s@~s"
                ,[props:get_value(<<"Username">>, Req), props:get_value(<<"Realm">>, Req)]
                ),
