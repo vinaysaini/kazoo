@@ -163,19 +163,23 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 handle_directory_lookup(Id, Props, Node) ->
     put('callid', Id),
-    case props:get_value(<<"sip_auth_method">>, Props) of
+    case props:get_first_defined([<<"sip_auth_method">>, <<"source">>], Props) of
         <<"REGISTER">> ->
             lager:debug("received fetch request (~s) for sip registration creds from ~s", [Id, Node]);
+        <<"mod_rtmp">> ->
+            lager:debug("received fetch request (~s) for rtmp registration creds from ~s", [Id, Node]);
         Else ->
             lager:debug("received fetch request for ~s (~s) user creds from ~s", [Else, Id, Node])
     end,
     whistle_stats:increment_counter("register-attempt"),
-    case {props:get_value(<<"Event-Name">>, Props), props:get_value(<<"action">>, Props)} of
+    case {props:get_value(<<"Event-Name">>, Props), props:get_first_defined([<<"action">>, <<"source">>], Props)} of
         {<<"REQUEST_PARAMS">>, <<"sip_auth">>} ->
             Method = props:get_value(<<"sip_auth_method">>, Props),
             lookup_user(Node, Id, Method, Props);
         {<<"REQUEST_PARAMS">>, <<"reverse-auth-lookup">>} ->
             lookup_user(Node, Id, <<"reverse-lookup">>, Props);
+        {<<"GENERAL">>, <<"mod_rtmp">>} ->
+            lookup_user(Node, Id, <<"mod_rtmp">>, Props);
         _Other ->
             {'ok', Resp} = ecallmgr_fs_xml:empty_response(),
             _ = freeswitch:fetch_reply(Node, Id, 'directory', Resp),

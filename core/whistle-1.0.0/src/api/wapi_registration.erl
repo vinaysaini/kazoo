@@ -32,8 +32,8 @@
 
 %% Registration Success
 -define(REG_SUCCESS_HEADERS, [<<"Event-Timestamp">>, <<"Contact">>
-                              ,<<"Expires">>, <<"Username">>
-                              ,<<"Realm">>
+                             ,<<"Expires">>
+                             ,<<"Username">>, <<"Realm">>
                              ]).
 -define(OPTIONAL_REG_SUCCESS_HEADERS, [<<"Status">>, <<"User-Agent">>
                                        ,<<"Call-ID">>, <<"Profile-Name">>
@@ -62,7 +62,8 @@
 
 %% Query Registrations
 -define(REG_QUERY_HEADERS, []).
--define(OPTIONAL_REG_QUERY_HEADERS, [<<"Username">>, <<"Realm">>
+-define(OPTIONAL_REG_QUERY_HEADERS, [<<"Username">>
+                                     ,<<"Realm">>
                                      ,<<"Count-Only">>, <<"Fields">>
                                     ]).
 -define(REG_QUERY_VALUES, [{<<"Event-Category">>, <<"directory">>}
